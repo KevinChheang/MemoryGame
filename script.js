@@ -174,7 +174,7 @@ const saveScoreToStorage = (score) => {
   }
   else {
     localStorage.setItem("SCORE", JSON.stringify(playerScore));
-    return JSON.parse(localStorage.getItem("SCORE")).dataset.score;
+    return JSON.parse(localStorage.getItem("SCORE"));
   }
 }
 
