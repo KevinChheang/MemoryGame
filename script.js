@@ -12,7 +12,7 @@ let firstGuess = "";
 let secondGuess = "";
 
 let previousTarget = null;
-let delay = 1200;
+let delay = 1000;
 
 let moveCount = 0;
 let countCardFlipped = 0;
@@ -98,7 +98,7 @@ grid.addEventListener('click', function(event) {
   
     // Do not allow the grid section itself to be selected; only select divs inside the grid
     if (clicked.tagName === 'SECTION' || clicked === previousTarget || 
-        clicked.parentElement.classList.contains("match")) {
+        clicked.parentElement.classList.contains("selected")) {
         return;
     }
   
@@ -118,7 +118,6 @@ grid.addEventListener('click', function(event) {
             // and the first guess matches the second match...
             if (firstGuess === secondGuess) {
                 countCardFlipped++;
-                // run the match function
                 const img = "image/" + clicked.parentElement.dataset.name + ".jpg";
                 setTimeout(match(img), delay);
                 setTimeout(resetGuesses, delay);
@@ -130,18 +129,21 @@ grid.addEventListener('click', function(event) {
         previousTarget = clicked;
     }
 
-    if(countCardFlipped === 12) {
-      setTimeout(finishMessage, 1000);
-    }
+
     moveCount++;
     span.innerText = moveCount;
+
+    if(countCardFlipped === 12) {
+      setTimeout(finishMessage, 1000);
+      countCardFlipped = 0;
+    }
 });
 
 // Add match CSS
 const match = (img) => {
     let selected = document.querySelectorAll('.selected')
     selected.forEach(card => {
-      card.classList.add('match')
+      card.classList.add('match');
       card.style.backgroundImage = `url(${img})`;
     });
 }
@@ -160,21 +162,23 @@ const resetGuesses = () => {
 
 const saveScoreToStorage = (score) => {
   const lowestScore = JSON.parse(localStorage.getItem("SCORE"));
+  // console.log("lowestScore.score", lowestScore[0]);
   const playerScore = [{bestScore: score}];
 
   if(lowestScore) {
-    if(lowestScore.score < playerScore.score) {
-      return;
+    if(lowestScore[0].bestScore <= playerScore[0].bestScore) {
+      return lowestScore[0].bestScore;
     }
     else {
       localStorage.removeItem("SCORE");
       localStorage.setItem("SCORE", JSON.stringify(playerScore));
-      return score;
+      return playerScore[0].bestScore;
     }
   }
   else {
     localStorage.setItem("SCORE", JSON.stringify(playerScore));
-    return JSON.parse(localStorage.getItem("SCORE"));
+    const score = JSON.parse(localStorage.getItem("SCORE"))
+    return score[0].bestScore;
   }
 }
 
